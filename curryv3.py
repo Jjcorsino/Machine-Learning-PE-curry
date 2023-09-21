@@ -10,11 +10,11 @@ mp_holistic = mp.solutions.holistic
 # Se importa el video 
 cap = cv2.VideoCapture(r"triplev2.mp4")
 
-with open('datos_por_frame.csv', 'w', newline='') as csvfile:
-    csvwriter = csv.writer(csvfile)
+# with open('datos_por_frame.csv', 'w', newline='') as csvfile:
+#    csvwriter = csv.writer(csvfile)
 
 # Se inicializa el modelo de pose
-    with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as Holistic:
+with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as Holistic:
         for _ in range(5):
             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
             
@@ -81,9 +81,9 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                     aux_image = np.zeros(frame.shape, np.uint8)
                     if hands_results:
                         points = [hands_results.landmark[20]]
-                        for point in points:
-                            row = [point.x, point.y]
-                            csvwriter.writerow(row)
+                        #for point in points:
+                        #   row = [point.x, point.y]
+                        #   csvwriter.writerow(row)
 
                     cv2.line(aux_image, (x1, y1), (x2, y2), (0, 255, 255), 4)
                     cv2.line(aux_image, (x2, y2), (x3, y3), (128, 0, 250), 4)
@@ -151,5 +151,5 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                     if cv2.waitKey(1) & 0xFF == 27:
                         break
 
-    cap.release()
-    cv2.destroyAllWindows()
+cap.release()
+cv2.destroyAllWindows()
