@@ -13,6 +13,10 @@ cap = cv2.VideoCapture(r"triplev2.mp4")
 column_labels = ["Frame", "Piernas 1", "Piernas 2", "Piernas 3"]
 
 
+output_video = cv2.VideoWriter('Transparent.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (800, 600))
+aux_image_video = cv2.VideoWriter('BlackBox.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (800, 600))
+pointers_video = cv2.VideoWriter('pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (800, 600))
+
 with open('datos_por_frame.csv', 'w', newline='') as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(column_labels)
@@ -20,6 +24,7 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
 
 # Se inicializa el modelo de pose y buclea 5 veces
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as Holistic:
+            manos = []
             for _ in range(5):
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
                 
@@ -32,7 +37,7 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                     
                 # Se procesa el frame
                     frame = cv2.flip(frame, 2)
-                    frame = cv2.resize(frame, (700, 500))
+                    frame = cv2.resize(frame, (800, 600))
                     height, width, _ = frame.shape
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                     results = Holistic.process(frame_rgb)
@@ -89,7 +94,9 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
 
                     # Se dibuja el angulo
                         aux_image = np.zeros(frame.shape, np.uint8)
+                        
                         if hands_results:
+                            manos = [hands_results.landmark[20]]
                             points = [Piernas, Pecho, Brazos]
                             for point in points:
                                 row = [cap.get(cv2.CAP_PROP_POS_FRAMES), Piernas, Pecho, Brazos]
@@ -116,6 +123,14 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                         cv2.fillPoly(aux_image, pts=[contours2], color=(255, 0, 255))
                         cv2.fillPoly(aux_image, pts=[contours3], color=(0, 255, 0))
                         output = cv2.addWeighted(frame, 1, aux_image, 0.55, 0)
+
+
+                    for mano in manos:
+                        cx, cy = int(mano.x * frame.shape[1]), int(mano.y * frame.shape[0])
+                        cv2.circle(frame, (cx, cy), 6, (255, 0, 0), 4)
+                        cv2.circle(aux_image, (cx, cy), 6, (255, 0, 0), 4)
+                        cv2.line(aux_image, (x6, y6), (cx, cy), (255, 0, 0), 4)
+                        cv2.line(output, (x6, y6), (cx, cy), (255, 0, 0), 4)
                 
 
                     # Se dibujan los puntos
@@ -145,8 +160,17 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                         cv2.imshow("Transparent", output)
                         cv2.imshow("BlackBox", aux_image)
                         cv2.imshow("Pointers", frame)
+
+                        output_video.write(output)
+                        aux_image_video.write(aux_image)
+                        pointers_video.write(frame)
+
                         if cv2.waitKey(1) & 0xFF == 27:
                             break
 
+    output_video.release()
+    aux_image_video.release()
+    pointers_video.release()
     cap.release()
     cv2.destroyAllWindows()
+  
