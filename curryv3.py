@@ -75,7 +75,13 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                     l6 = np.linalg.norm(p4 - p5)
                     angle2 = degrees(acos((l4**2 + l6**2 - l5**2)/(2*l4*l6)))
 
-
+                    p7 = np.array([x4, y4])
+                    p8 = np.array([x5, y5])
+                    p9 = np.array([x6, y6])
+                    l7 = np.linalg.norm(p8 - p9)
+                    l8 = np.linalg.norm(p7 - p9)
+                    l9 = np.linalg.norm(p7 - p8)
+                    angle3 = degrees(acos((l7**2 + l9**2 - l8**2)/(2*l7*l9)))
 
                 # Se dibuja el angulo
                     aux_image = np.zeros(frame.shape, np.uint8)
@@ -85,25 +91,26 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                         #   row = [point.x, point.y]
                         #   csvwriter.writerow(row)
 
-                    cv2.line(aux_image, (x1, y1), (x2, y2), (0, 255, 255), 4)
+                    cv2.line(aux_image, (x1, y1), (x2, y2), (0, 255, 96), 4)
                     cv2.line(aux_image, (x2, y2), (x3, y3), (128, 0, 250), 4)
                     cv2.line(aux_image, (x3, y3), (x4, y4), (255, 191, 0), 4)
                     cv2.line(aux_image, (x4, y4), (x5, y5), (0, 255, 255), 4)
                     cv2.line(aux_image, (x5, y5), (x6, y6), (128, 0, 250), 4)
-                    cv2.line(aux_image, (x4, y4), (x7, y7), (0, 191, 0), 4)
+                    cv2.line(aux_image, (x4, y4), (x7, y7), (0, 91, 0), 4)
                     cv2.line(aux_image, (x7, y7), (x8, y8), (0, 191, 0), 4)
                     cv2.line(aux_image, (x0, y0), (x1, y1), (0, 255, 255), 4)
-                    cv2.line(aux_image, (x0, y0), (x10, y10), (0, 255, 255), 4)
-                    cv2.line(aux_image, (x10, y10), (x1, y1), (0, 255, 255), 4)
                     cv2.putText(aux_image, str(int(angle)), (x2 +40, y2), 1, 1.5, (0, 255, 255), 2)
                     cv2.putText(aux_image, str(int(angle2)), (x4 +40, y4), 1, 1.5, (255, 0, 255), 2)
+                    cv2.putText(aux_image, str(int(angle3)), (x5 -70, y5), 1, 1.5, (0, 255, 0), 2)
 
                 # Se dibuja el poligono
                     contours = np.array([[x1, y1], [x2, y2], [x3, y3]])
                     contours2 = np.array([[x3, y3], [x4, y4], [x5, y5]])
-                    cv2.fillPoly(aux_image, pts=[contours], color=(25, 150, 255))
-                    cv2.fillPoly(aux_image, pts=[contours2], color=(250, 50, 25))
-                    output = cv2.addWeighted(frame, 1, aux_image, 0.5, 0)
+                    contours3 = np.array([[x4, y4], [x5, y5], [x6, y6]])
+                    cv2.fillPoly(aux_image, pts=[contours], color=(0, 255, 255))
+                    cv2.fillPoly(aux_image, pts=[contours2], color=(255, 0, 255))
+                    cv2.fillPoly(aux_image, pts=[contours3], color=(0, 255, 0))
+                    output = cv2.addWeighted(frame, 1, aux_image, 0.55, 0)
                 
                 # Dibujar los puntos en el frame
                     for point in points:
@@ -113,35 +120,26 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                         cv2.line(aux_image, (x6, y6), (cx, cy), (255, 0, 0), 4)
                         cv2.line(output, (x6, y6), (cx, cy), (255, 0, 0), 4)
 
-
-
-                        
-
                 # Se dibujan los puntos
                     cv2.circle(aux_image, (x1, y1), 5, (0, 255, 255), 4)
                     cv2.circle(aux_image, (x2, y2), 5, (128, 0, 250), 4)
                     cv2.circle(aux_image, (x3, y3), 5, (255, 191, 0), 4)
-                    cv2.circle(aux_image, (x4, y4), 5, (0, 255, 255), 4)
+                    cv2.circle(aux_image, (x4, y4), 5, (255, 25, 235), 4)
                     cv2.circle(aux_image, (x5, y5), 5, (128, 0, 250), 4)
                     cv2.circle(aux_image, (x6, y6), 5, (255, 191, 0), 4)
                     cv2.circle(aux_image, (x7, y7), 5, (0, 191, 0), 4)
-                    cv2.circle(aux_image, (x0, y0), 5, (0, 255, 255), 4)
-                    cv2.circle(aux_image, (x10, y10), 5, (0, 255, 255), 4)
+                    cv2.circle(aux_image, (x0, y0), 5, (42, 73, 255), 4)
                     cv2.circle(aux_image, (x8, y8), 5, (0, 120, 255), 4)
-
-
 
                     cv2.circle(frame, (x1, y1), 5, (0, 255, 255), 4)
                     cv2.circle(frame, (x2, y2), 5, (128, 0, 250), 4)
                     cv2.circle(frame, (x3, y3), 5, (255, 191, 0), 4)
-                    cv2.circle(frame, (x4, y4), 5, (0, 255, 255), 4)
+                    cv2.circle(frame, (x4, y4), 5, (255, 25, 235), 4)
                     cv2.circle(frame, (x5, y5), 5, (128, 0, 250), 4)
                     cv2.circle(frame, (x6, y6), 5, (255, 191, 0), 4)
                     cv2.circle(frame, (x7, y7), 5, (0, 191, 0), 4)
-                    cv2.circle(frame, (x0, y0), 5, (0, 255, 255), 4)
-                    cv2.circle(frame, (x10, y10), 5, (0, 255, 255), 4)
+                    cv2.circle(frame, (x0, y0), 5, (42, 73, 255), 4)
                     cv2.circle(frame, (x8, y8), 5, (0, 120, 255), 4)
-
 
 
                 # Se muestra el resultado
