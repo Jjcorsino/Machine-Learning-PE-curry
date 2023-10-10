@@ -36,7 +36,7 @@ pip install csv
 puede ejecutar el script utilizando el siguiente comando
 
 ```
-python curvyv3.py
+python left_tracker_mediapipe_py
 ```
 
 Después de la ejecución, los resultados se guardarán en un archivo CSV y en los archivos de video mencionados anteriormente en la carpeta raíz del repositorio.
