@@ -1,3 +1,4 @@
+import os
 import cv2
 import mediapipe as mp
 import numpy as np
@@ -16,9 +17,19 @@ column_labels = ["Frame", "Piernas", "Pecho", "Brazo"]
 
 output_video = cv2.VideoWriter('Transparent.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
 aux_image_video = cv2.VideoWriter('BlackBox.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
-pointers_video = cv2.VideoWriter('pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
+pointers_video = cv2.VideoWriter('Pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
 
-with open('datos_por_frame.csv', 'w', newline='') as csvfile:
+base_filename = 'datos_por_frame.csv'
+csv_filename = base_filename
+
+# Verificar si el archivo ya existe
+file_counter = 0
+while os.path.exists(csv_filename):
+    file_counter += 1
+    csv_filename = f'{os.path.splitext(base_filename)[0]}_{file_counter}.csv'
+
+# Crear y escribir en el archivo CSV
+with open(csv_filename, 'w', newline='') as csvfile:
     csvwriter = csv.writer(csvfile)
     csvwriter.writerow(column_labels)
 
@@ -76,9 +87,9 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                         l3 = np.linalg.norm(p1 - p2)
                         Piernas = degrees(acos((l1**2 + l3**2 - l2**2)/(2*l1*l3)))
 
-                        p4 = np.array([x4, y4])
-                        p5 = np.array([x5, y5])
-                        p6 = np.array([x6, y6])
+                        p4 = np.array([x3, y3])
+                        p5 = np.array([x4, y4])
+                        p6 = np.array([x5, y5])
                         l4 = np.linalg.norm(p5 - p6)
                         l5 = np.linalg.norm(p4 - p6)
                         l6 = np.linalg.norm(p4 - p5)
@@ -96,11 +107,17 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                         aux_image = np.zeros(frame.shape, np.uint8)
                         
                         if hands_results:
-                            manos = [hands_results.landmark[20]]
+                            manos = [hands_results.landmark[9]]
                             points = [Piernas, Pecho, Brazos]
                             for point in points:
                                 row = [cap.get(cv2.CAP_PROP_POS_FRAMES), Piernas, Pecho, Brazos]
                                 csvwriter.writerow(row)
+
+                        # Calcula la altura del área izquierda del frame
+                        left_area_height = int(height / 2)
+
+                        # Calcula la coordenada y central
+                        center_y = int(left_area_height / 2)
 
                         # Se dibujan las lineas y se agregan los textos de los angulos
                         cv2.line(aux_image, (x1, y1), (x2, y2), (0, 255, 96), 4)
@@ -112,9 +129,14 @@ with open('datos_por_frame.csv', 'w', newline='') as csvfile:
                         cv2.line(aux_image, (x7, y7), (x8, y8), (0, 191, 0), 4)
                         cv2.line(aux_image, (x0, y0), (x10, y10), (0, 191, 0), 4)
                         cv2.line(aux_image, (x0, y0), (x1, y1), (0, 255, 255), 4)
-                        cv2.putText(aux_image, str(int(Piernas)), (x2 +40, y2), 1, 1.5, (0, 255, 255), 2)
-                        cv2.putText(aux_image, str(int(Pecho)), (x4 +40, y4), 1, 1.5, (255, 0, 255), 2)
-                        cv2.putText(aux_image, str(int(Brazos)), (x5 -70, y5), 1, 1.5, (0, 255, 0), 2)
+
+                        text_piernas = f"Piernas: {int(Piernas)}"
+                        text_pecho = f"Pecho: {int(Pecho)}"
+                        text_brazos = f"Brazos: {int(Brazos)}"
+                        cv2.putText(aux_image, text_piernas, (20, center_y), 1, 1.5, (0, 255, 255), 2)
+                        cv2.putText(aux_image, text_pecho, (20, center_y + 50), 1, 1.5, (255, 0, 255), 2)
+                        cv2.putText(aux_image, text_brazos, (20, center_y + 100), 1, 1.5, (0, 255, 0), 2)
+
 
                     # Se dibujan los angulos
                         contours = np.array([[x1, y1], [x2, y2], [x3, y3]])
