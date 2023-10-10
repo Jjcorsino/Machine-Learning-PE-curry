@@ -14,7 +14,7 @@ cap = cv2.VideoCapture(0)
 
 column_labels = ["Frame", "Piernas", "Pecho", "Brazo"]
 
-
+# Da como resultado 3 frames diferentes
 output_video = cv2.VideoWriter('Transparent.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
 aux_image_video = cv2.VideoWriter('BlackBox.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
 pointers_video = cv2.VideoWriter('Pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
@@ -22,7 +22,7 @@ pointers_video = cv2.VideoWriter('Pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v')
 base_filename = 'datos_por_frame.csv'
 csv_filename = base_filename
 
-# Verificar si el archivo ya existe
+# Verificar si el archivo csv ya existe
 file_counter = 0
 while os.path.exists(csv_filename):
     file_counter += 1
@@ -34,7 +34,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
     csvwriter.writerow(column_labels)
 
 
-# Se inicializa el modelo de pose y buclea 5 veces
+# Se inicializa el modelo de pose
     with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as Holistic:
             manos = []
             for _ in range(1):
@@ -47,7 +47,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
                         break
 
                     
-                # Se procesa el frame
+                # Se procesa el frame y se le da tamaño
                     frame = cv2.flip(frame, 2)
                     frame = cv2.resize(frame, (1280, 720))
                     height, width, _ = frame.shape
@@ -78,7 +78,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
                         x8 = int(results.pose_landmarks.landmark[7].x * width)
                         y8 = int(results.pose_landmarks.landmark[7].y * height)
 
-                    # Se calcula el angulo
+                    # Se calculan los angulos
                         p1 = np.array([x1, y1])
                         p2 = np.array([x2, y2])
                         p3 = np.array([x3, y3])
@@ -103,9 +103,10 @@ with open(csv_filename, 'w', newline='') as csvfile:
                         l9 = np.linalg.norm(p7 - p8)
                         Brazos = degrees(acos((l7**2 + l9**2 - l8**2)/(2*l7*l9)))
 
-                    # Se dibuja el angulo
+                    # Se dibujan los angulos
                         aux_image = np.zeros(frame.shape, np.uint8)
                         
+                        # Se escriben los datos en el archivo CSV y se trackea el punto 9 de la mano izquierda
                         if hands_results:
                             manos = [hands_results.landmark[9]]
                             points = [Piernas, Pecho, Brazos]
@@ -113,13 +114,11 @@ with open(csv_filename, 'w', newline='') as csvfile:
                                 row = [cap.get(cv2.CAP_PROP_POS_FRAMES), Piernas, Pecho, Brazos]
                                 csvwriter.writerow(row)
 
-                        # Calcula la altura del área izquierda del frame
+                        # Calcula la altura del área izquierda del frame y el centro de esta
                         left_area_height = int(height / 2)
-
-                        # Calcula la coordenada y central
                         center_y = int(left_area_height / 2)
 
-                        # Se dibujan las lineas y se agregan los textos de los angulos
+                        # Se dibujan las lineas
                         cv2.line(aux_image, (x1, y1), (x2, y2), (0, 255, 96), 4)
                         cv2.line(aux_image, (x2, y2), (x3, y3), (128, 0, 250), 4)
                         cv2.line(aux_image, (x3, y3), (x4, y4), (255, 191, 0), 4)
@@ -130,12 +129,13 @@ with open(csv_filename, 'w', newline='') as csvfile:
                         cv2.line(aux_image, (x0, y0), (x10, y10), (0, 191, 0), 4)
                         cv2.line(aux_image, (x0, y0), (x1, y1), (0, 255, 255), 4)
 
+                        # Se agregan los textos de los angulos 
                         text_piernas = f"Piernas: {int(Piernas)}"
                         text_pecho = f"Pecho: {int(Pecho)}"
                         text_brazos = f"Brazos: {int(Brazos)}"
-                        cv2.putText(aux_image, text_piernas, (20, center_y), 1, 1.5, (0, 255, 255), 2)
+                        cv2.putText(aux_image, text_brazos, (20, center_y), 1, 1.5, (0, 255, 0), 2)
                         cv2.putText(aux_image, text_pecho, (20, center_y + 50), 1, 1.5, (255, 0, 255), 2)
-                        cv2.putText(aux_image, text_brazos, (20, center_y + 100), 1, 1.5, (0, 255, 0), 2)
+                        cv2.putText(aux_image, text_piernas, (20, center_y + 100), 1, 1.5, (0, 255, 255), 2)
 
 
                     # Se dibujan los angulos
@@ -147,7 +147,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
                         cv2.fillPoly(aux_image, pts=[contours3], color=(0, 255, 0))
                         output = cv2.addWeighted(frame, 1, aux_image, 0.55, 0)
 
-
+                    # Se dibujan los puntos de las manos
                     for mano in manos:
                         cx, cy = int(mano.x * frame.shape[1]), int(mano.y * frame.shape[0])
                         cv2.circle(frame, (cx, cy), 6, (255, 0, 0), 4)
