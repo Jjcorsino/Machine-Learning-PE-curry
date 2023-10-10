@@ -15,9 +15,9 @@ cap = cv2.VideoCapture(0)
 column_labels = ["Frame", "Piernas", "Pecho", "Brazo"]
 
 # Da como resultado 3 frames diferentes
-output_video = cv2.VideoWriter('Transparent.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
-aux_image_video = cv2.VideoWriter('BlackBox.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
-pointers_video = cv2.VideoWriter('Pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 30, (1280, 720))
+output_video = cv2.VideoWriter('Transparent.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (1280, 720))
+aux_image_video = cv2.VideoWriter('BlackBox.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (1280, 720))
+pointers_video = cv2.VideoWriter('Pointers.mp4', cv2.VideoWriter_fourcc(*'mp4v'), 15, (1280, 720))
 
 base_filename = 'datos_por_frame.csv'
 csv_filename = base_filename
@@ -48,7 +48,7 @@ with open(csv_filename, 'w', newline='') as csvfile:
 
                     
                 # Se procesa el frame y se le da tamaño
-                    frame = cv2.flip(frame, 2)
+                    frame = cv2.flip(frame, 1)
                     frame = cv2.resize(frame, (1280, 720))
                     height, width, _ = frame.shape
                     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
